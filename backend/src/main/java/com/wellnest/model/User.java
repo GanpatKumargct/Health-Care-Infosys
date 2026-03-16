@@ -36,6 +36,9 @@ public class User implements UserDetails {
     private Integer age;
     private Double height; // in cm
     private Double weight; // in kg
+    private Double bloodGlucose; // in mg/dL
+    private String bloodPressure; // e.g., 120/80
+    private Integer heartRate; // in bpm
 
     // Professional details for Doctors
     private String specialization;
@@ -53,7 +56,7 @@ public class User implements UserDetails {
     private Role role;
 
     public void calculateProfileCompletion() {
-        int totalFields = 6; // name, age, height, weight, fitnessGoal, activityLevel
+        int totalFields = 9; // name, age, height, weight, fitnessGoal, activityLevel, bloodGlucose, bloodPressure, heartRate
         int completedFields = 0;
 
         if (fullName != null && !fullName.isEmpty())
@@ -63,6 +66,12 @@ public class User implements UserDetails {
         if (height != null && height > 0)
             completedFields++;
         if (weight != null && weight > 0)
+            completedFields++;
+        if (bloodGlucose != null && bloodGlucose > 0)
+            completedFields++;
+        if (bloodPressure != null && !bloodPressure.isEmpty())
+            completedFields++;
+        if (heartRate != null && heartRate > 0)
             completedFields++;
         if (fitnessGoal != null && !fitnessGoal.isEmpty())
             completedFields++;

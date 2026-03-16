@@ -23,10 +23,19 @@ const RegisterPatient = () => {
         e.preventDefault();
         try {
             const response = await api.post('/auth/register', formData);
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('role', response.data.role);
-            localStorage.setItem('profileCompletion', response.data.profileCompletionPercentage);
-            navigate('/dashboard');
+            const currentRole = localStorage.getItem('role');
+            
+            // If registered by receptionist, don't login as patient
+            if (currentRole === 'RECEPTIONIST') {
+                navigate('/dashboard', { state: { message: 'Patient registered successfully!' } });
+            } else {
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('role', response.data.role);
+                localStorage.setItem('userId', response.data.id);
+                localStorage.setItem('fullName', response.data.fullName);
+                localStorage.setItem('profileCompletion', response.data.profileCompletionPercentage);
+                navigate('/dashboard');
+            }
         } catch (err) {
             setError('Registration failed. Please try again.');
             console.error(err);

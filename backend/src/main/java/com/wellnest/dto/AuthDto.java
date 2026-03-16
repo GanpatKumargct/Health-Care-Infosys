@@ -43,6 +43,7 @@ public class AuthDto {
         private String token;
         private String role;
         private String fullName;
+        private Long id;
         private Integer profileCompletionPercentage;
     }
 }

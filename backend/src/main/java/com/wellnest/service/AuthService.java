@@ -46,6 +46,7 @@ public class AuthService {
                                 .token(jwtToken)
                                 .role(user.getRole().name())
                                 .fullName(user.getFullName())
+                                .id(user.getId())
                                 .profileCompletionPercentage(user.getProfileCompletionPercentage())
                                 .build();
         }

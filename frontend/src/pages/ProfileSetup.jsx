@@ -9,6 +9,9 @@ const ProfileSetup = () => {
         age: '',
         height: '',
         weight: '',
+        bloodGlucose: '',
+        bloodPressure: '',
+        heartRate: '',
         fitnessGoal: '',
         activityLevel: ''
     });
@@ -27,6 +30,9 @@ const ProfileSetup = () => {
                     age: data.age || '',
                     height: data.height || '',
                     weight: data.weight || '',
+                    bloodGlucose: data.bloodGlucose || '',
+                    bloodPressure: data.bloodPressure || '',
+                    heartRate: data.heartRate || '',
                     fitnessGoal: data.fitnessGoal || '',
                     activityLevel: data.activityLevel || ''
                 });
@@ -50,6 +56,10 @@ const ProfileSetup = () => {
         try {
             const response = await updateProfile(formData);
             setCompletion(response.data.profileCompletionPercentage);
+            localStorage.setItem('profileCompletion', response.data.profileCompletionPercentage);
+            localStorage.setItem('bloodGlucose', formData.bloodGlucose);
+            localStorage.setItem('bloodPressure', formData.bloodPressure);
+            localStorage.setItem('heartRate', formData.heartRate);
             setSuccess('Profile updated successfully!');
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
@@ -126,6 +136,40 @@ const ProfileSetup = () => {
                                 type="number"
                                 name="weight"
                                 value={formData.weight}
+                                onChange={handleChange}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}
+                            />
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                        <div style={{ flex: 1 }}>
+                            <label>Blood Glucose (mg/dL)</label>
+                            <input
+                                type="number"
+                                name="bloodGlucose"
+                                value={formData.bloodGlucose}
+                                onChange={handleChange}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}
+                            />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <label>Blood Pressure (mmHg)</label>
+                            <input
+                                type="text"
+                                name="bloodPressure"
+                                placeholder="e.g. 120/80"
+                                value={formData.bloodPressure}
+                                onChange={handleChange}
+                                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}
+                            />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <label>Heart Rate (bpm)</label>
+                            <input
+                                type="number"
+                                name="heartRate"
+                                value={formData.heartRate}
                                 onChange={handleChange}
                                 style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}
                             />

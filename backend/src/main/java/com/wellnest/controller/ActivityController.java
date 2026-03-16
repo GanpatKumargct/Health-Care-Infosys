@@ -1,5 +1,6 @@
 package com.wellnest.controller;
 
+import com.wellnest.dto.WeeklySummaryDto;
 import com.wellnest.model.Activity;
 import com.wellnest.model.User;
 import com.wellnest.service.ActivityService;
@@ -25,5 +26,10 @@ public class ActivityController {
     @GetMapping
     public ResponseEntity<List<Activity>> getActivities(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(activityService.getUserActivities(user.getId()));
+    }
+
+    @GetMapping("/weekly-summary")
+    public ResponseEntity<WeeklySummaryDto> getWeeklySummary(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(activityService.getWeeklySummary(user.getId()));
     }
 }

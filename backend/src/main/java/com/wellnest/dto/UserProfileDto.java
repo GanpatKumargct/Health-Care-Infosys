@@ -14,6 +14,9 @@ public class UserProfileDto {
     private Integer age;
     private Double height;
     private Double weight;
+    private Double bloodGlucose;
+    private String bloodPressure;
+    private Integer heartRate;
     private String fitnessGoal;
     private String activityLevel;
     private Integer profileCompletionPercentage;

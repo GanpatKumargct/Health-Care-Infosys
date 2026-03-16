@@ -7,6 +7,9 @@ import RegisterDoctor from './pages/RegisterDoctor';
 import RegisterReceptionist from './pages/RegisterReceptionist';
 import Dashboard from './pages/Dashboard';
 import ProfileSetup from './pages/ProfileSetup';
+import Appointments from './pages/Appointments';
+import Records from './pages/Records';
+import AdminPanel from './pages/AdminPanel';
 import './index.css';
 
 function App() {
@@ -22,6 +25,10 @@ function App() {
           <Route path="/register/receptionist" element={<RegisterReceptionist />} />
           <Route path="/dashboard/*" element={<Dashboard />} />
           <Route path="/profile-setup" element={<ProfileSetup />} />
+          <Route path="/appointments" element={<Appointments />} />
+          <Route path="/records" element={<Records />} />
+          <Route path="/records/:patientId" element={<Records />} />
+          <Route path="/admin" element={<AdminPanel />} />
         </Routes>
       </div>
     </Router>

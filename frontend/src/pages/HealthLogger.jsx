@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { logActivity } from '../services/api';
-import { Activity, Utensils, Moon, Droplets, Plus, Clock, Flame } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { logActivity, createHabit, getMyHabits, logHabit, getHabitLogs, deleteHabit } from '../services/api';
+import { Activity, Utensils, Moon, Droplets, Plus, Clock, Flame, CheckCircle2, Circle, Trash2 } from 'lucide-react';
 
 const HealthLogger = ({ onActivityLogged }) => {
     const [activeTab, setActiveTab] = useState('WORKOUT');
@@ -11,6 +11,36 @@ const HealthLogger = ({ onActivityLogged }) => {
         notes: ''
     });
     const [loading, setLoading] = useState(false);
+    
+    // Habit Tracker States
+    const [habits, setHabits] = useState([]);
+    const [habitLogs, setHabitLogs] = useState({});
+    const [newHabit, setNewHabit] = useState({ name: '', target: '' });
+    const [habitLoading, setHabitLoading] = useState(false);
+
+    useEffect(() => {
+        fetchHabitData();
+    }, []);
+
+    const fetchHabitData = async () => {
+        setHabitLoading(true);
+        try {
+            const habitsRes = await getMyHabits();
+            setHabits(habitsRes.data);
+            
+            const today = new Date().toISOString().split('T')[0];
+            const logsRes = await getHabitLogs(today);
+            const logsMap = {};
+            logsRes.data.forEach(log => {
+                logsMap[log.habitId] = log.completed;
+            });
+            setHabitLogs(logsMap);
+        } catch (err) {
+            console.error('Failed to fetch habit data', err);
+        } finally {
+            setHabitLoading(false);
+        }
+    };
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
@@ -40,6 +70,39 @@ const HealthLogger = ({ onActivityLogged }) => {
             console.error('Logging failed', err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleCreateHabit = async (e) => {
+        e.preventDefault();
+        if (!newHabit.name) return;
+        try {
+            await createHabit(newHabit);
+            setNewHabit({ name: '', target: '' });
+            fetchHabitData();
+        } catch (err) {
+            console.error('Failed to create habit', err);
+        }
+    };
+
+    const handleToggleHabit = async (habitId) => {
+        const today = new Date().toISOString().split('T')[0];
+        const currentStatus = !!habitLogs[habitId];
+        try {
+            await logHabit(habitId, { date: today, completed: !currentStatus });
+            setHabitLogs({ ...habitLogs, [habitId]: !currentStatus });
+        } catch (err) {
+            console.error('Failed to log habit', err);
+        }
+    };
+
+    const handleDeleteHabit = async (habitId) => {
+        if (!window.confirm('Are you sure you want to delete this habit?')) return;
+        try {
+            await deleteHabit(habitId);
+            fetchHabitData();
+        } catch (err) {
+            console.error('Failed to delete habit', err);
         }
     };
 
@@ -229,6 +292,109 @@ const HealthLogger = ({ onActivityLogged }) => {
                     {loading ? 'Logging...' : `Log ${tabs.find(t => t.id === activeTab).label}`}
                 </button>
             </form>
+
+            <hr style={{ margin: '2rem 0', borderColor: 'var(--border)' }} />
+
+            <div className="habit-tracker">
+                <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <CheckCircle2 size={20} color="var(--primary)" />
+                    Daily Habits
+                </h3>
+
+                {/* Add New Habit Form */}
+                <form onSubmit={handleCreateHabit} style={{ marginBottom: '1.5rem', display: 'flex', gap: '0.5rem' }}>
+                    <div style={{ flex: 2 }}>
+                        <input
+                            type="text"
+                            placeholder="Habit name (e.g., Drink 2L Water)"
+                            value={newHabit.name}
+                            onChange={(e) => setNewHabit({ ...newHabit, name: e.target.value })}
+                            required
+                            style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-alt)' }}
+                        />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                        <input
+                            type="text"
+                            placeholder="Target (optional)"
+                            value={newHabit.target}
+                            onChange={(e) => setNewHabit({ ...newHabit, target: e.target.value })}
+                            style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-alt)' }}
+                        />
+                    </div>
+                    <button type="submit" className="btn btn-primary" style={{ padding: '0.5rem 1rem' }}>
+                        <Plus size={18} />
+                    </button>
+                </form>
+
+                {/* Habits List */}
+                {habitLoading ? (
+                    <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Loading habits...</p>
+                ) : habits.length === 0 ? (
+                    <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '1rem', border: '1px dashed var(--border)', borderRadius: 'var(--radius-sm)' }}>
+                        No habits defined yet. Add one above!
+                    </p>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        {habits.map((habit) => (
+                            <div key={habit.id} style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '1rem',
+                                padding: '0.75rem 1rem',
+                                borderRadius: 'var(--radius-sm)',
+                                background: habitLogs[habit.id] ? 'var(--bg-alt)' : 'var(--card-bg)',
+                                border: '1px solid var(--border)',
+                                transition: 'all 0.2s'
+                            }}>
+                                <button
+                                    onClick={() => handleToggleHabit(habit.id)}
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        color: habitLogs[habit.id] ? '#10b981' : 'var(--text-muted)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        transition: 'transform 0.1s active'
+                                    }}
+                                >
+                                    {habitLogs[habit.id] ? <CheckCircle2 size={24} /> : <Circle size={24} />}
+                                </button>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ 
+                                        fontWeight: '600', 
+                                        textDecoration: habitLogs[habit.id] ? 'line-through' : 'none',
+                                        color: habitLogs[habit.id] ? 'var(--text-muted)' : 'var(--text)'
+                                    }}>
+                                        {habit.name}
+                                    </div>
+                                    {habit.target && (
+                                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                            Goal: {habit.target}
+                                        </div>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={() => handleDeleteHabit(habit.id)}
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        color: 'var(--text-muted)',
+                                        opacity: 0.5,
+                                        transition: 'opacity 0.2s'
+                                    }}
+                                    onMouseOver={(e) => e.currentTarget.style.opacity = 1}
+                                    onMouseOut={(e) => e.currentTarget.style.opacity = 0.5}
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
